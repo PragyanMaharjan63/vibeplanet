@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5674';
+// Defaults to a relative path so requests always go to whatever host served
+// the page (nginx proxies /api to the backend container in production, and
+// the Vite dev server proxies it locally — see vite.config.js).
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export async function fetchMessages() {
   const res = await fetch(`${API_URL}/api/messages`);

@@ -7,7 +7,10 @@ RUN npm install
 
 COPY . .
 
-ARG VITE_API_URL=http://localhost:5674
+# Leave empty (default) to use same-origin relative /api requests, proxied
+# to the backend container by nginx.conf. Only set this if the backend is
+# served from a different domain than the frontend.
+ARG VITE_API_URL=
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
