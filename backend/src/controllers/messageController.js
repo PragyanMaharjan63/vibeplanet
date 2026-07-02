@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Message from '../models/Message.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 
@@ -24,4 +25,20 @@ export const createMessage = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(message);
+});
+
+export const deleteMessage = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ error: 'Invalid message id' });
+  }
+
+  const deleted = await Message.findByIdAndDelete(id);
+
+  if (!deleted) {
+    return res.status(404).json({ error: 'Message not found' });
+  }
+
+  res.status(204).end();
 });

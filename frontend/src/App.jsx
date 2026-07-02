@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Scene from './components/Scene.jsx';
-import { fetchMessages, postMessage } from './api.js';
+import ManagePanel from './components/ManagePanel.jsx';
+import { fetchMessages, postMessage, deleteMessage } from './api.js';
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -8,6 +9,7 @@ export default function App() {
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [manageOpen, setManageOpen] = useState(false);
 
   useEffect(() => {
     fetchMessages()
@@ -33,6 +35,17 @@ export default function App() {
     }
   }
 
+  async function handleDelete(id) {
+    const previous = messages;
+    setMessages((prev) => prev.filter((m) => m._id !== id));
+    try {
+      await deleteMessage(id);
+    } catch (err) {
+      setMessages(previous);
+      setError(err.message);
+    }
+  }
+
   return (
     <div className="app">
       <div className="canvas-wrap">
@@ -44,7 +57,12 @@ export default function App() {
           <span className="wordmark-dot" />
           Aetheris
         </div>
-        <div className="topbar-meta">Orbital Message Archive</div>
+        <div className="topbar-right">
+          <div className="topbar-meta">Orbital Message Archive</div>
+          <button type="button" className="manage-trigger" onClick={() => setManageOpen(true)}>
+            Manage messages
+          </button>
+        </div>
       </header>
 
       <div className="nameplate">
@@ -85,6 +103,10 @@ export default function App() {
         </form>
         {error && <div className="status error">{error}</div>}
       </aside>
+
+      {manageOpen && (
+        <ManagePanel messages={messages} onDelete={handleDelete} onClose={() => setManageOpen(false)} />
+      )}
 
       <div className="footer-hint">Drag to rotate&ensp;·&ensp;Scroll to zoom</div>
     </div>

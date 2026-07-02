@@ -21,3 +21,11 @@ export async function postMessage({ name, text }) {
   }
   return res.json();
 }
+
+export async function deleteMessage(id) {
+  const res = await fetch(`${API_URL}/api/messages/${id}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Failed to delete message');
+  }
+}
