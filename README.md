@@ -28,9 +28,9 @@ web1/
 docker compose up --build
 ```
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000/api/health
-- MongoDB: localhost:27017 (data persisted in the `mongo-data` volume)
+- Frontend: http://localhost:3671
+- Backend API: http://localhost:5674/api/health
+- MongoDB: localhost:26712 (data persisted in the `mongo-data` volume)
 
 ## Run locally without Docker
 
@@ -59,4 +59,4 @@ Each service has its own `.env` (with a checked-in `.env.example` template):
 - `.env` (root) — `FRONTEND_PORT`, `BACKEND_PORT`, `MONGO_PORT`, `VITE_API_URL` used by `docker-compose.yml`
 
 Update `VITE_API_URL` in both `frontend/.env` and the root `.env` if you deploy
-the backend somewhere other than `localhost:5000`.
+the backend somewhere other than `localhost:5674`.
