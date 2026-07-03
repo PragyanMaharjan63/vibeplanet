@@ -4,3 +4,6 @@ dist/
 !.env.example
 *.log
 .DS_Store
+
+# Mongo dumps contain real user data (emails, password hashes) — never commit them.
+/backups/

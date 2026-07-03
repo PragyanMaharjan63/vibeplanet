@@ -32,6 +32,23 @@ services:
       timeout: 5s
       retries: 5
 
+  backup:
+    build:
+      context: ./backup
+    container_name: web1-backup
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://mongo:27017/web1
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - web1net
+
   backend:
     build:
       context: ./backend

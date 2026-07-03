@@ -1,18 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Scene from '../components/Scene.jsx';
+import PlanetSelect from '../components/PlanetSelect.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchMessages, postMessage } from '../api.js';
+import { PLANETS, DEFAULT_PLANET, getPlanet } from '../planets.js';
 
 export default function Home() {
   const { user, isAdmin, logout } = useAuth();
   const [messages, setMessages] = useState([]);
+  const [view, setView] = useState('detail');
+  const [selectedPlanet, setSelectedPlanet] = useState(DEFAULT_PLANET);
+  const [destinationPlanet, setDestinationPlanet] = useState(DEFAULT_PLANET);
   const [name, setName] = useState('');
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
+
+  const config = getPlanet(selectedPlanet);
+  const messagesForPlanet = messages.filter((m) => (m.planet || DEFAULT_PLANET) === selectedPlanet);
 
   function loadMessages() {
     setLoading(true);
@@ -33,6 +41,22 @@ export default function Home() {
     loadMessages();
   }, []);
 
+  // Default the "send to" planet to whichever one is currently in view —
+  // still overridable in the form before submitting.
+  useEffect(() => {
+    setDestinationPlanet(selectedPlanet);
+  }, [selectedPlanet]);
+
+  function handleViewChange({ view: nextView, planet }) {
+    setView(nextView);
+    if (planet) setSelectedPlanet(planet);
+  }
+
+  function handleSelectFromSystem(planetId) {
+    setSelectedPlanet(planetId);
+    setView('detail');
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!name.trim() || !text.trim()) return;
@@ -40,7 +64,7 @@ export default function Home() {
     setSubmitting(true);
     setError('');
     try {
-      const created = await postMessage({ name, text });
+      const created = await postMessage({ name, text, planet: destinationPlanet });
       setMessages((prev) => [created, ...prev]);
       setName('');
       setText('');
@@ -54,7 +78,13 @@ export default function Home() {
   return (
     <div className="app">
       <div className="canvas-wrap">
-        <Scene messages={messages} />
+        <Scene
+          mode={view}
+          selectedPlanet={selectedPlanet}
+          messages={messagesForPlanet}
+          allMessages={messages}
+          onSelectPlanet={handleSelectFromSystem}
+        />
       </div>
 
       <header className="topbar">
@@ -62,6 +92,9 @@ export default function Home() {
           <span className="wordmark-dot" />
           Aetheris
         </div>
+
+        <PlanetSelect view={view} selectedPlanet={selectedPlanet} onChange={handleViewChange} />
+
         <div className="topbar-right">
           {user ? (
             <>
@@ -89,19 +122,35 @@ export default function Home() {
       </header>
 
       <div className="nameplate">
-        <div className="nameplate-label">Planet</div>
-        <h1 className="nameplate-title">Aetheris</h1>
-        <div className="nameplate-sub">
-          {loading
-            ? 'Kepler Sector · Ringed Class · loading transmissions…'
-            : loadFailed
-            ? 'Kepler Sector · Ringed Class · offline'
-            : `Kepler Sector · Ringed Class · ${messages.length} ${
-                messages.length === 1 ? 'message' : 'messages'
-              } in orbit`}
-        </div>
-        {!loading && messages.length === 0 && !loadFailed && (
-          <div className="nameplate-hint">No transmissions yet — be the first to launch one.</div>
+        {view === 'system' ? (
+          <>
+            <div className="nameplate-label">Overview</div>
+            <h1 className="nameplate-title">Solar System</h1>
+            <div className="nameplate-sub">
+              {loading
+                ? 'Charting transmissions…'
+                : loadFailed
+                ? 'Offline'
+                : `${messages.length} ${messages.length === 1 ? 'message' : 'messages'} across 8 worlds · click a planet to visit it`}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="nameplate-label">Planet</div>
+            <h1 className="nameplate-title">{config.name}</h1>
+            <div className="nameplate-sub">
+              {loading
+                ? `${config.tagline} · loading transmissions…`
+                : loadFailed
+                ? `${config.tagline} · offline`
+                : `${config.tagline} · ${messagesForPlanet.length} ${
+                    messagesForPlanet.length === 1 ? 'message' : 'messages'
+                  } in orbit`}
+            </div>
+            {!loading && messagesForPlanet.length === 0 && !loadFailed && (
+              <div className="nameplate-hint">No transmissions yet — be the first to launch one.</div>
+            )}
+          </>
         )}
         {loadFailed && (
           <button type="button" className="retry-button" onClick={loadMessages}>
@@ -134,6 +183,16 @@ export default function Home() {
                 maxLength={240}
                 onChange={(e) => setText(e.target.value)}
               />
+            </label>
+            <label className="field">
+              <span>Send to</span>
+              <select value={destinationPlanet} onChange={(e) => setDestinationPlanet(e.target.value)}>
+                {PLANETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
             </label>
             <button type="submit" disabled={submitting || !name.trim() || !text.trim()}>
               {submitting ? 'Launching…' : 'Launch transmission'}

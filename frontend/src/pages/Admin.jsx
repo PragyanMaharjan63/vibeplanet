@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchMessagesForAdmin, deleteMessage } from '../api.js';
+import { getPlanet } from '../planets.js';
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -80,6 +81,7 @@ export default function Admin() {
               <div className="manage-item-body">
                 <div className="manage-item-name">
                   {message.name}
+                  <span className="admin-item-planet">{getPlanet(message.planet).name}</span>
                   {message.author?.email && (
                     <span className="admin-item-author"> · {message.author.email}</span>
                   )}

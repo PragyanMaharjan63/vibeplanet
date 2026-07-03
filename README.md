@@ -83,6 +83,39 @@ existing admin's password, either:
 Regular users set their own password through the `/signup` form — it's
 hashed with bcrypt the same way before being stored.
 
+## Backups
+
+The `backup` service ([backup/](backup/)) runs a small container (built from
+the official `mongo:7` image, purely for its bundled `mongodump` binary — it
+never runs `mongod` itself) that dumps MongoDB on a timer and writes
+gzip-compressed archives to `./backups` on the host, which is bind-mounted in
+so you can browse the dumps directly without `docker exec`. It backs up
+immediately on startup, then every `BACKUP_INTERVAL_SECONDS` (default: 24h),
+and auto-deletes dumps older than `BACKUP_RETENTION_DAYS` (default: 7),
+both configurable in the root `.env`.
+
+This only protects the server's own disk (accidental deletes, a bad
+migration, DB corruption) — if the whole EC2 instance/volume is destroyed,
+these backups go with it. Copy `./backups` off-server periodically (e.g.
+`scp` to your laptop, or a cron `rsync` to another machine) if you want that
+extra layer.
+
+**Trigger a backup manually right now:**
+```bash
+docker compose exec backup /usr/local/bin/backup.sh
+```
+
+**List available backups:**
+```bash
+ls -la backups/
+```
+
+**Restore from a backup** (⚠️ `--drop` replaces existing `messages`/`users`
+collections with the dump's contents):
+```bash
+docker compose exec backup mongorestore --archive=/backups/web1-<timestamp>.archive.gz --gzip --uri="mongodb://mongo:27017/web1" --drop
+```
+
 ## Run locally without Docker
 
 Backend (requires local MongoDB and Redis reachable via `MONGO_URI` /

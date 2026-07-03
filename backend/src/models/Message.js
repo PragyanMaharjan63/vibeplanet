@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { PLANET_IDS, DEFAULT_PLANET } from '../constants/planets.js';
 
 const messageSchema = new mongoose.Schema(
   {
@@ -7,6 +8,11 @@ const messageSchema = new mongoose.Schema(
       required: true,
       trim: true,
       maxlength: 40,
+    },
+    planet: {
+      type: String,
+      enum: PLANET_IDS,
+      default: DEFAULT_PLANET,
     },
     text: {
       type: String,
