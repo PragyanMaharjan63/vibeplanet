@@ -84,7 +84,9 @@ body,
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
   pointer-events: auto;
 }
 
@@ -97,6 +99,7 @@ body,
 }
 
 .manage-trigger {
+  display: inline-block;
   padding: 8px 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
@@ -106,6 +109,7 @@ body,
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.04em;
+  text-decoration: none;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
@@ -154,6 +158,32 @@ body,
   font-size: 13px;
   color: var(--text-dim);
   letter-spacing: 0.04em;
+}
+
+.nameplate-hint {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.retry-button {
+  margin-top: 12px;
+  pointer-events: auto;
+  padding: 8px 14px;
+  background: rgba(253, 164, 175, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  color: var(--danger);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.retry-button:hover {
+  background: rgba(253, 164, 175, 0.18);
 }
 
 /* ---------- Transmission panel ---------- */
@@ -273,6 +303,47 @@ body,
   color: var(--danger);
 }
 
+.auth-gate p {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.auth-gate-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-gate-link {
+  flex: 1;
+  text-align: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.auth-gate-link:hover {
+  border-color: var(--border-focus);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-gate-link.primary {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+  color: #041018;
+  font-weight: 600;
+}
+
+.auth-gate-link.primary:hover {
+  filter: brightness(1.12);
+}
+
 /* ---------- Orb message cards (rendered inside the 3D scene) ---------- */
 
 .orb-card {
@@ -306,67 +377,7 @@ body,
   color: var(--text);
 }
 
-/* ---------- Manage panel ---------- */
-
-.manage-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: flex;
-  justify-content: flex-end;
-  background: rgba(2, 4, 12, 0.55);
-  backdrop-filter: blur(2px);
-  animation: manage-fade-in 0.15s ease;
-}
-
-@keyframes manage-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.manage-panel {
-  width: 380px;
-  max-width: 100%;
-  height: 100%;
-  padding: 28px 24px;
-  background: var(--surface-strong);
-  border-left: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.manage-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.manage-close {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-dim);
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.manage-close:hover {
-  color: var(--text);
-  border-color: var(--border-focus);
-}
+/* ---------- Message list (reused by the admin page) ---------- */
 
 .manage-empty {
   color: var(--text-faint);
@@ -457,6 +468,131 @@ body,
   cursor: not-allowed;
 }
 
+/* ---------- Auth pages (login / signup) ---------- */
+
+.route-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--text-dim);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  padding: 24px;
+}
+
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 20%, #0d1424 0%, var(--bg) 65%);
+}
+
+.auth-card {
+  width: 360px;
+  max-width: 100%;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-card .panel-title {
+  margin-bottom: 4px;
+}
+
+.field-hint {
+  margin-top: -8px;
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.auth-switch {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.auth-back {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+
+.auth-back:hover {
+  color: var(--text-dim);
+}
+
+/* ---------- Admin page ---------- */
+
+.admin-page {
+  min-height: 100vh;
+  padding: 32px clamp(20px, 6vw, 64px);
+  background: radial-gradient(circle at 50% 0%, #0d1424 0%, var(--bg) 60%);
+}
+
+.admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.admin-meta {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-error {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.admin-list {
+  max-width: 640px;
+  overflow-y: visible;
+}
+
+.admin-item-author {
+  color: var(--text-faint);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 /* ---------- Footer hint ---------- */
 
 .footer-hint {
@@ -499,8 +635,12 @@ body,
     display: none;
   }
 
-  .manage-panel {
-    width: 100%;
+  .admin-page {
+    padding: 20px 16px;
+  }
+
+  .admin-header {
+    flex-direction: column;
   }
 
   .footer-hint {

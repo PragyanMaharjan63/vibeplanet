@@ -18,6 +18,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: '#7dd3fc',
     },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   { timestamps: true }
 );

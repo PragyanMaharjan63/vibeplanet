@@ -15,6 +15,23 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: web1-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-26379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - web1net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -26,6 +43,8 @@ services:
       - "${BACKEND_PORT:-5674}:5674"
     depends_on:
       mongo:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - web1net
@@ -46,6 +65,7 @@ services:
 
 volumes:
   mongo-data:
+  redis-data:
 
 networks:
   web1net:

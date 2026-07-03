@@ -9,6 +9,16 @@ export const getMessages = asyncHandler(async (req, res) => {
   res.json(messages);
 });
 
+// Admin-only view: same data, plus the author's email for accountability
+// when deciding what to moderate.
+export const getMessagesForAdmin = asyncHandler(async (req, res) => {
+  const messages = await Message.find()
+    .sort({ createdAt: -1 })
+    .populate('author', 'email')
+    .limit(200);
+  res.json(messages);
+});
+
 export const createMessage = asyncHandler(async (req, res) => {
   const { name, text } = req.body;
 
@@ -22,6 +32,7 @@ export const createMessage = asyncHandler(async (req, res) => {
     name: name.slice(0, 40),
     text: text.slice(0, 240),
     color,
+    author: req.user.id,
   });
 
   res.status(201).json(message);
