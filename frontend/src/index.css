@@ -46,6 +46,39 @@ body,
 .canvas-wrap {
   position: absolute;
   inset: 0;
+  animation: canvas-fade-in 1.2s ease both;
+}
+
+@keyframes canvas-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Subtle darkening at the edges so HUD text always sits on readable ground */
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(4, 6, 13, 0.55) 0%, transparent 18%),
+    linear-gradient(0deg, rgba(4, 6, 13, 0.6) 0%, transparent 24%),
+    radial-gradient(ellipse at center, transparent 55%, rgba(4, 6, 13, 0.35) 100%);
+}
+
+::selection {
+  background: rgba(125, 211, 252, 0.25);
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ---------- Top bar ---------- */
@@ -296,6 +329,9 @@ body,
 }
 
 .field span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.12em;
@@ -385,6 +421,30 @@ body,
   color: var(--danger);
 }
 
+.status.success {
+  color: #86efac;
+  animation: status-pop 0.25s ease;
+}
+
+@keyframes status-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.char-count {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--text-faint);
+}
+
 .auth-gate p {
   margin: 0 0 14px;
   font-size: 13px;
@@ -457,6 +517,27 @@ body,
   font-size: 11.5px;
   line-height: 1.4;
   color: var(--text);
+}
+
+.planet-label {
+  padding: 3px 9px;
+  background: rgba(10, 12, 24, 0.55);
+  border: 1px solid rgba(148, 163, 216, 0.18);
+  border-radius: 20px;
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.planet-label.active {
+  color: var(--label-color, var(--accent));
+  border-color: var(--label-color, var(--accent));
 }
 
 /* ---------- Message list (reused by the admin page) ---------- */
@@ -592,6 +673,43 @@ body,
   margin-bottom: 4px;
 }
 
+.auth-brand {
+  justify-content: center;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--text-dim);
+}
+
+/* ---------- 404 page ---------- */
+
+.notfound-card {
+  text-align: center;
+  align-items: center;
+}
+
+.notfound-code {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #f5f8ff 30%, #3a4266);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.notfound-text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.notfound-card .auth-gate-link {
+  width: 100%;
+}
+
 .field-hint {
   margin-top: -8px;
   font-size: 11.5px;
@@ -673,6 +791,51 @@ body,
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
+}
+
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.admin-chip em {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--text-faint);
+}
+
+.admin-chip:hover {
+  border-color: var(--chip-color, var(--border-focus));
+  color: var(--text);
+}
+
+.admin-chip.active {
+  border-color: var(--chip-color, var(--accent));
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.admin-chip.active em {
+  color: var(--chip-color, var(--accent));
 }
 
 .admin-item-planet {

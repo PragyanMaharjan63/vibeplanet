@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchMessagesForAdmin, deleteMessage } from '../api.js';
-import { getPlanet } from '../planets.js';
+import { PLANETS, getPlanet } from '../planets.js';
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -11,6 +11,21 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [pendingId, setPendingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
+  const [planetFilter, setPlanetFilter] = useState('all');
+
+  const counts = useMemo(() => {
+    const map = {};
+    for (const m of messages) {
+      const key = m.planet || 'earth';
+      map[key] = (map[key] || 0) + 1;
+    }
+    return map;
+  }, [messages]);
+
+  const visibleMessages =
+    planetFilter === 'all'
+      ? messages
+      : messages.filter((m) => (m.planet || 'earth') === planetFilter);
 
   function load() {
     setLoading(true);
@@ -60,6 +75,29 @@ export default function Admin() {
         </div>
       </header>
 
+      {!loading && !error && messages.length > 0 && (
+        <div className="admin-filters">
+          <button
+            type="button"
+            className={`admin-chip ${planetFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setPlanetFilter('all')}
+          >
+            All <em>{messages.length}</em>
+          </button>
+          {PLANETS.filter((p) => counts[p.id]).map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`admin-chip ${planetFilter === p.id ? 'active' : ''}`}
+              style={{ '--chip-color': p.glow }}
+              onClick={() => setPlanetFilter(p.id)}
+            >
+              {p.name} <em>{counts[p.id]}</em>
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading && <div className="manage-empty">Loading transmissions…</div>}
       {!loading && error && (
         <div className="admin-error">
@@ -72,10 +110,13 @@ export default function Admin() {
       {!loading && !error && messages.length === 0 && (
         <div className="manage-empty">No messages in orbit yet.</div>
       )}
+      {!loading && !error && messages.length > 0 && visibleMessages.length === 0 && (
+        <div className="manage-empty">No messages on this planet.</div>
+      )}
 
-      {!loading && !error && messages.length > 0 && (
+      {!loading && !error && visibleMessages.length > 0 && (
         <ul className="manage-list admin-list">
-          {messages.map((message) => (
+          {visibleMessages.map((message) => (
             <li key={message._id} className="manage-item">
               <span className="manage-item-dot" style={{ '--orb-color': message.color }} />
               <div className="manage-item-body">

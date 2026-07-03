@@ -27,6 +27,10 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
+        <div className="wordmark auth-brand">
+          <span className="wordmark-dot" />
+          Aetheris
+        </div>
         <div className="panel-label">Access</div>
         <h1 className="panel-title">Create an account</h1>
 

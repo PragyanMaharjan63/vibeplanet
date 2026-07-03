@@ -50,11 +50,11 @@ export async function fetchMessages() {
   return res.json();
 }
 
-export async function postMessage({ name, text }) {
+export async function postMessage({ name, text, planet }) {
   const res = await authFetch('/api/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, text }),
+    body: JSON.stringify({ name, text, planet }),
   });
   if (!res.ok) throw await parseError(res, 'Failed to post message');
   return res.json();

@@ -1,6 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { getPlanetTextures } from '../utils/planetTextures.js';
 
 const RING_TILT = [-Math.PI / 2.6, 0, Math.PI / 14];
 const BASE_RADIUS = 1.1;
@@ -9,6 +10,10 @@ export default function Planet({ config }) {
   const planetRef = useRef();
   const ringsRef = useRef();
   const radius = BASE_RADIUS * config.size;
+  const { map, bumpMap } = useMemo(
+    () => getPlanetTextures(config.id, config.texture),
+    [config.id, config.texture]
+  );
 
   useFrame((state, delta) => {
     planetRef.current.rotation.y += delta * config.rotationSpeed * 0.24;
@@ -21,10 +26,13 @@ export default function Planet({ config }) {
       <mesh ref={planetRef}>
         <sphereGeometry args={[radius, 64, 64]} />
         <meshStandardMaterial
-          color={config.color}
+          map={map}
+          bumpMap={bumpMap}
+          bumpScale={bumpMap ? 0.04 : 0}
           emissive={config.emissive}
-          roughness={0.55}
-          metalness={0.35}
+          emissiveIntensity={0.35}
+          roughness={0.85}
+          metalness={0.06}
         />
       </mesh>
 

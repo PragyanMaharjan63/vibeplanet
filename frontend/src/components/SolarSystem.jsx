@@ -1,7 +1,9 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { PLANETS } from '../planets.js';
+import { getPlanetTextures } from '../utils/planetTextures.js';
 
 function Sun() {
   const ref = useRef();
@@ -51,6 +53,10 @@ function OrbitingPlanet({ config, messageColors, selected, onSelect }) {
   const bodyRef = useRef();
   const angleRef = useRef(Math.random() * Math.PI * 2);
   const bodyRadius = 0.28 + config.size * 0.16;
+  const { map } = useMemo(
+    () => getPlanetTextures(config.id, config.texture),
+    [config.id, config.texture]
+  );
 
   useFrame((state, delta) => {
     angleRef.current += delta * config.orbitSpeed * 0.15;
@@ -86,12 +92,19 @@ function OrbitingPlanet({ config, messageColors, selected, onSelect }) {
       >
         <sphereGeometry args={[bodyRadius, 32, 32]} />
         <meshStandardMaterial
-          color={config.color}
+          map={map}
           emissive={selected ? config.glow : config.emissive}
-          emissiveIntensity={selected ? 0.6 : 0.3}
-          roughness={0.5}
+          emissiveIntensity={selected ? 0.7 : 0.35}
+          roughness={0.85}
+          metalness={0.05}
         />
       </mesh>
+
+      <Html distanceFactor={9} position={[0, bodyRadius + 0.22, 0]} center>
+        <div className={`planet-label ${selected ? 'active' : ''}`} style={{ '--label-color': config.glow }}>
+          {config.name}
+        </div>
+      </Html>
 
       {config.hasRing && (
         <mesh rotation={[-Math.PI / 2.6, 0, Math.PI / 14]}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Scene from '../components/Scene.jsx';
 import PlanetSelect from '../components/PlanetSelect.jsx';
@@ -16,8 +16,10 @@ export default function Home() {
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
+  const successTimer = useRef(null);
 
   const config = getPlanet(selectedPlanet);
   const messagesForPlanet = messages.filter((m) => (m.planet || DEFAULT_PLANET) === selectedPlanet);
@@ -39,6 +41,7 @@ export default function Home() {
 
   useEffect(() => {
     loadMessages();
+    return () => clearTimeout(successTimer.current);
   }, []);
 
   // Default the "send to" planet to whichever one is currently in view —
@@ -46,6 +49,13 @@ export default function Home() {
   useEffect(() => {
     setDestinationPlanet(selectedPlanet);
   }, [selectedPlanet]);
+
+  useEffect(() => {
+    document.title =
+      view === 'system'
+        ? 'Solar System — Aetheris'
+        : `${config.name} — Aetheris`;
+  }, [view, config.name]);
 
   function handleViewChange({ view: nextView, planet }) {
     setView(nextView);
@@ -63,11 +73,19 @@ export default function Home() {
 
     setSubmitting(true);
     setError('');
+    setSuccess('');
     try {
       const created = await postMessage({ name, text, planet: destinationPlanet });
       setMessages((prev) => [created, ...prev]);
       setName('');
       setText('');
+      const destination = getPlanet(destinationPlanet);
+      setSuccess(`Transmission launched to ${destination.name} 🚀`);
+      clearTimeout(successTimer.current);
+      successTimer.current = setTimeout(() => setSuccess(''), 4000);
+      // Jump to where the message just went so the user sees it arrive.
+      setSelectedPlanet(destinationPlanet);
+      setView('detail');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,6 +104,7 @@ export default function Home() {
           onSelectPlanet={handleSelectFromSystem}
         />
       </div>
+      <div className="vignette" aria-hidden="true" />
 
       <header className="topbar">
         <div className="wordmark">
@@ -175,7 +194,10 @@ export default function Home() {
               />
             </label>
             <label className="field">
-              <span>Message</span>
+              <span>
+                Message
+                <em className="char-count">{text.length}/240</em>
+              </span>
               <textarea
                 placeholder="Say something worth orbiting…"
                 rows={3}
@@ -213,9 +235,14 @@ export default function Home() {
         )}
 
         {error && <div className="status error">{error}</div>}
+        {success && <div className="status success">{success}</div>}
       </aside>
 
-      <div className="footer-hint">Drag to rotate&ensp;·&ensp;Scroll to zoom</div>
+      <div className="footer-hint">
+        {view === 'system'
+          ? 'Click a planet to visit · Drag to rotate · Scroll to zoom'
+          : 'Drag to rotate · Scroll to zoom'}
+      </div>
     </div>
   );
 }

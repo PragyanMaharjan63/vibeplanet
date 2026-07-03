@@ -30,8 +30,12 @@ export default function Login() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
+        <div className="wordmark auth-brand">
+          <span className="wordmark-dot" />
+          Aetheris
+        </div>
         <div className="panel-label">Access</div>
-        <h1 className="panel-title">Log in to Aetheris</h1>
+        <h1 className="panel-title">Log in to mission control</h1>
 
         <label className="field">
           <span>Email</span>
