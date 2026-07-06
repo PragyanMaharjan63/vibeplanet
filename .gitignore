@@ -7,3 +7,4 @@ dist/
 
 # Mongo dumps contain real user data (emails, password hashes) — never commit them.
 /backups/
+*.archive.gz
