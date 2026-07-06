@@ -4,6 +4,7 @@ import { OrbitControls, Stars, Sparkles } from '@react-three/drei';
 import Planet from './Planet.jsx';
 import MessageOrb from './MessageOrb.jsx';
 import SolarSystem from './SolarSystem.jsx';
+import ShootingStars from './ShootingStars.jsx';
 import { getPlanet } from '../planets.js';
 
 export default function Scene({ mode, selectedPlanet, messages, allMessages, onSelectPlanet }) {
@@ -28,6 +29,7 @@ export default function Scene({ mode, selectedPlanet, messages, allMessages, onS
       <Suspense fallback={null}>
         <Stars radius={80} depth={50} count={4000} factor={2.6} fade speed={0.4} />
         <Sparkles count={60} scale={12} size={1.6} speed={0.3} color="#a9c8ff" />
+        <ShootingStars count={5} />
 
         {isSystem ? (
           <SolarSystem
