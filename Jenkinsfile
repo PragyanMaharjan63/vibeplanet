@@ -19,6 +19,10 @@ pipeline {
 
         stage('Build & Start Services') {
             steps {
+                // Tear down any previous stack first so leftover fixed-name
+                // containers (web1-mongo, etc.) don't cause a name conflict.
+                // No -v flag, so named volumes (web1_mongo-data) are KEPT — data is safe.
+                sh 'docker compose down --remove-orphans || true'
                 sh 'docker compose up --build -d'
             }
         }
