@@ -1,3 +1,9 @@
+# Pin the project name so the stack always attaches to the same named volumes
+# (web1_mongo-data, web1_redis-data) regardless of which directory runs it.
+# Without this, Compose derives the project from the current folder name, so
+# Jenkins' workspace path would create fresh, empty volumes and "lose" the data.
+name: web1
+
 services:
   mongo:
     image: mongo:7
