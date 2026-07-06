@@ -41,9 +41,9 @@ pipeline {
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Build & Start Services') {
             steps {
-                sh 'docker compose build'
+                sh 'docker compose up --build -d'
             }
         }
     }
