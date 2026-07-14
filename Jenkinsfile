@@ -13,14 +13,11 @@ pipeline {
             }
         }
 
-        stage('Build Images') {
+        stage('Build and Start Containers') {
             steps {
-                // CI only: build the three images (frontend, backend, backup) to
-                // verify their Dockerfiles compile. We do NOT `up` the stack here
-                // because this server is not the deploy target — so there are no
-                // containers, no env files needed, no database, and nothing left
-                // running after the build.
-                sh 'docker compose build'
+                // Build the images, recreate the Compose stack, and leave all
+                // services running in the background on the Jenkins host.
+                sh 'docker compose up --detach --build --remove-orphans'
             }
         }
     }
