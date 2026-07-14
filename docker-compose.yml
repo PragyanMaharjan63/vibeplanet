@@ -61,7 +61,7 @@ services:
     container_name: web1-backend
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - ./.env
     ports:
       - "${BACKEND_PORT:-5674}:5674"
     depends_on:

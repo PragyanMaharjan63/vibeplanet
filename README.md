@@ -20,10 +20,10 @@ only an admin account can delete one (from a protected `/admin` panel).
 
 ```
 web1/
-├── backend/          Express API (Dockerfile, .env)
-├── frontend/          React + Three.js app (Dockerfile, .env)
+├── backend/          Express API (Dockerfile)
+├── frontend/          React + Three.js app (Dockerfile)
 ├── docker-compose.yml
-└── .env               shared ports / build args for docker-compose
+└── .env               single env file for the whole project (see below)
 ```
 
 ## Run everything with Docker Compose
@@ -63,14 +63,14 @@ logged-in visitor doesn't get bounced every 15 minutes.
 
 There's no public admin signup. On backend startup, `seedAdmin()`
 ([backend/src/seed/seedAdmin.js](backend/src/seed/seedAdmin.js)) reads
-`ADMIN_EMAIL` / `ADMIN_PASSWORD` from `backend/.env`, hashes the password
+`ADMIN_EMAIL` / `ADMIN_PASSWORD` from the root `.env`, hashes the password
 with bcrypt (12 salt rounds — the raw password is never stored), and either
 creates that account as `role: "admin"` or promotes an existing account with
 that email to admin if it already exists.
 
 **To set or change the admin password:**
 
-1. Edit `ADMIN_PASSWORD` (and `ADMIN_EMAIL` if you want) in `backend/.env`
+1. Edit `ADMIN_PASSWORD` (and `ADMIN_EMAIL` if you want) in the root `.env`
 2. Restart the backend: `docker compose up -d --build --force-recreate backend`
 
 This only *creates or promotes* — it won't overwrite the password of an
@@ -92,7 +92,7 @@ gzip-compressed archives to `./backups` on the host, which is bind-mounted in
 so you can browse the dumps directly without `docker exec`. It backs up
 immediately on startup, then every `BACKUP_INTERVAL_SECONDS` (default: 24h),
 and auto-deletes dumps older than `BACKUP_RETENTION_DAYS` (default: 7),
-both configurable in the root `.env`.
+both configurable in the root `.env` (same file as everything else).
 
 This only protects the server's own disk (accidental deletes, a bad
 migration, DB corruption) — if the whole EC2 instance/volume is destroyed,
@@ -119,7 +119,7 @@ docker compose exec backup mongorestore --archive=/backups/web1-<timestamp>.arch
 ## Run locally without Docker
 
 Backend (requires local MongoDB and Redis reachable via `MONGO_URI` /
-`REDIS_URL` in `backend/.env`):
+`REDIS_URL` in the root `.env`):
 
 ```bash
 cd backend
@@ -137,21 +137,25 @@ npm run dev   # http://localhost:5173
 
 ## Environment files
 
-Each service has its own `.env` (with a checked-in `.env.example` template):
+There's a single `.env` at the project root (with a checked-in `.env.example`
+template) — `docker-compose.yml` reads it directly for ports and build args,
+the backend container gets it via `env_file`, and the backend's own
+`npm run dev` / Vite's `npm run dev` both resolve it relative to their source
+files, so it's the one file to edit regardless of how you're running things:
 
-- `backend/.env` — `PORT`, `MONGO_URI`, `REDIS_URL`, `JWT_SECRET`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL_SECONDS`, `COOKIE_SECURE`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
-- `frontend/.env` — `VITE_API_URL` (baked into the build at build time; leave empty — see below)
-- `.env` (root) — `FRONTEND_PORT`, `BACKEND_PORT`, `MONGO_PORT`, `REDIS_PORT`, `VITE_API_URL` used by `docker-compose.yml`
+- `FRONTEND_PORT`, `BACKEND_PORT`, `MONGO_PORT`, `REDIS_PORT` — host port mapping used by `docker-compose.yml`
+- `VITE_API_URL` — baked into the frontend build at build time (see below)
+- `BACKUP_INTERVAL_SECONDS`, `BACKUP_RETENTION_DAYS` — backup service settings
+- `PORT`, `MONGO_URI`, `REDIS_URL`, `JWT_SECRET`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL_SECONDS`, `COOKIE_SECURE`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` — backend config
 
 `VITE_API_URL` should normally stay **empty**. The frontend then calls
 same-origin relative paths (`/api/messages`), which nginx proxies to the
 backend container — this works on `localhost`, a server's public IP, or a
 real domain without any rebuild. Only set `VITE_API_URL` if the backend is
 genuinely hosted on a *different* domain than the frontend (e.g. a separate
-API subdomain); in that case set it in both `frontend/.env` and the root
-`.env` and rebuild.
+API subdomain), then rebuild.
 
-`JWT_SECRET` ships with a generated dev value in `backend/.env` — generate
-your own for any real deployment with `openssl rand -hex 32`, and set
+`JWT_SECRET` ships with a generated dev value in `.env` — generate your own
+for any real deployment with `openssl rand -hex 32`, and set
 `COOKIE_SECURE=true` once the site is served over HTTPS (required for the
 auth cookies to be sent at all over a secure connection).

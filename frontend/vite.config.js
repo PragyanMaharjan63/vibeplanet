@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  // Project has a single .env at the repo root instead of one per service.
+  envDir: '..',
   plugins: [react()],
   server: {
     host: true,

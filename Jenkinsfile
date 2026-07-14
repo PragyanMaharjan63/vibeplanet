@@ -13,6 +13,18 @@ pipeline {
             }
         }
 
+        stage('Inject Environment File') {
+            steps {
+                // The project has a single root .env (docker-compose reads it
+                // directly, and the backend container gets it via env_file).
+                // It's gitignored, so checkout scm never brings it in — pull
+                // it from the "pragyan-main-env" Secret file credential.
+                withCredentials([file(credentialsId: 'pragyan-main-env', variable: 'ENV_FILE')]) {
+                    sh 'cp "$ENV_FILE" .env'
+                }
+            }
+        }
+
         stage('Build and Start Containers') {
             steps {
                 // Build the images, recreate the Compose stack, and leave all
