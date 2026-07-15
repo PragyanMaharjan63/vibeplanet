@@ -20,8 +20,19 @@ pipeline {
                 // It's gitignored, so checkout scm never brings it in — pull
                 // it from the "pragyan-main-env" Secret file credential.
                 withCredentials([file(credentialsId: 'pragyan-main-env', variable: 'ENV_FILE')]) {
-                    sh 'cp "$ENV_FILE" .env'
+                    sh '''
+                        rm -f .env
+                        cp "$ENV_FILE" .env
+                    '''
                 }
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                // Scan project dependencies and configuration without scanning
+                // the injected .env secret file.
+                sh 'trivy fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 .'
             }
         }
 
